@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solar People — Calculateur de rémunération partenaires</title>
+<style>
+  :root{
+    --jaune:#F5C518;
+    --noir:#1A1A1A;
+    --gris:#6b6b6b;
+    --gris-clair:#f4f4f2;
+    --ligne:#e3e3df;
+    --blanc:#ffffff;
+    --vert:#2e7d32;
+    --rouge:#c62828;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Poppins',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    background:var(--gris-clair);
+    color:var(--noir);
+    font-size:14px;
+    line-height:1.5;
+    padding:24px 16px 64px;
+  }
+  .wrap{max-width:900px;margin:0 auto}
+
+  header{
+    background:var(--noir);
+    color:var(--blanc);
+    border-radius:10px 10px 0 0;
+    padding:22px 28px 18px;
+    border-bottom:4px solid var(--jaune);
+  }
+  header h1{font-size:19px;font-weight:600;letter-spacing:.2px}
+  header .sub{color:#c9c9c9;font-size:12.5px;margin-top:3px}
+  header .sub b{color:var(--jaune);font-weight:600}
+
+  .card{
+    background:var(--blanc);
+    border:1px solid var(--ligne);
+    border-top:none;
+    padding:24px 28px;
+  }
+  .card:last-of-type{border-radius:0 0 10px 10px}
+
+  h2{
+    font-size:12px;text-transform:uppercase;letter-spacing:1.2px;
+    color:var(--gris);font-weight:600;margin-bottom:14px;
+    display:flex;align-items:center;gap:10px;
+  }
+  h2::after{content:"";flex:1;height:1px;background:var(--ligne)}
+  h2 .btn-reset{
+    font-size:11px;text-transform:none;letter-spacing:0;font-weight:500;
+    background:none;border:1px solid #cfcfca;border-radius:5px;padding:3px 10px;
+    cursor:pointer;color:var(--gris);font-family:inherit;
+  }
+  h2 .btn-reset:hover{border-color:var(--noir);color:var(--noir)}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 20px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+
+  label{display:block;font-size:12.5px;font-weight:500;margin-bottom:4px}
+  .hint{font-size:11.5px;color:var(--gris);font-weight:400}
+  input[type=text],input[type=number],select{
+    width:100%;padding:9px 11px;border:1px solid #cfcfca;border-radius:6px;
+    font:inherit;font-size:14px;background:#fff;
+  }
+  input:focus,select:focus{outline:2px solid var(--jaune);outline-offset:0;border-color:var(--jaune)}
+
+  .segment{display:flex;border:1px solid #cfcfca;border-radius:6px;overflow:hidden}
+  .segment button{
+    flex:1;padding:9px 6px;background:#fff;border:none;font:inherit;font-size:13px;
+    cursor:pointer;color:var(--gris);border-right:1px solid var(--ligne);
+  }
+  .segment button:last-child{border-right:none}
+  .segment button.on{background:var(--noir);color:var(--jaune);font-weight:600}
+
+  .check{display:flex;align-items:flex-start;gap:9px;padding:10px 12px;border:1px solid var(--ligne);border-radius:6px;background:#fbfbfa;cursor:pointer}
+  .check input{margin-top:3px;accent-color:var(--noir);width:15px;height:15px;flex:none}
+  .check .t{font-size:13px;font-weight:500}
+  .check .d{font-size:11.5px;color:var(--gris)}
+  .check.disabled{opacity:.45;pointer-events:none}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--ligne);vertical-align:middle}
+  th{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--gris);font-weight:600}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  tr.total td{font-weight:600;border-top:2px solid var(--noir);border-bottom:none;padding-top:12px}
+  .tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:99px;background:var(--gris-clair);color:var(--noir);font-weight:500}
+  .tag.sp{background:var(--noir);color:var(--jaune)}
+
+  .regle{display:flex;align-items:center;gap:5px;white-space:nowrap}
+  .regle input{
+    width:64px;padding:5px 7px;font-size:13px;text-align:right;
+    border:1px solid #cfcfca;border-radius:5px;background:#fffdf3;
+  }
+  .regle input.modif{border-color:var(--jaune);background:#fff8dc;font-weight:600}
+  input#taux.modif{border-color:var(--jaune);background:#fff8dc;font-weight:600}
+  .regle .u{font-size:12px;color:var(--gris)}
+
+  .facture{
+    background:var(--noir);color:#fff;border-radius:8px;padding:16px 20px;
+    display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-top:6px;
+  }
+  .facture .lbl{font-size:12px;color:#c9c9c9}
+  .facture .val{font-size:22px;font-weight:600;color:var(--jaune);font-variant-numeric:tabular-nums}
+
+  .totaux{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:18px}
+  .tot{border:1px solid var(--ligne);border-radius:8px;padding:14px 16px;background:#fbfbfa}
+  .tot.sp{background:var(--noir);color:#fff;border-color:var(--noir)}
+  .tot .who{font-size:12px;font-weight:600}
+  .tot.sp .who{color:var(--jaune)}
+  .tot .amt{font-size:20px;font-weight:600;margin-top:2px;font-variant-numeric:tabular-nums}
+  .tot .det{font-size:11px;color:var(--gris);margin-top:4px}
+  .tot.sp .det{color:#b9b9b9}
+
+  .controle{font-size:11.5px;color:var(--gris);margin-top:14px;display:flex;align-items:center;gap:6px}
+  .controle.ok::before{content:"✓";color:var(--vert);font-weight:700}
+  .controle.ko::before{content:"⚠";color:var(--rouge);font-weight:700}
+  .controle.ko{color:var(--rouge)}
+
+  .alerte-grille{
+    display:none;font-size:12px;color:var(--rouge);margin-top:10px;
+    padding:8px 12px;border:1px solid var(--rouge);border-radius:6px;background:#fdf2f2;
+  }
+  .alerte-grille.on{display:block}
+
+  .note{font-size:11.5px;color:var(--gris);margin-top:10px}
+  footer{max-width:900px;margin:14px auto 0;font-size:11px;color:var(--gris);text-align:center}
+  @media print{
+    body{background:#fff;padding:0}
+    .card,header{border-radius:0}
+    input,select,.segment button{border-color:#999}
+    .btn-reset{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Calculateur de rémunération — Réseau de partenaires</h1>
+  <div class="sub"><b>Solar People</b> · Convention de partenariat V1.2 — Mai 2026 · Articles 5.2, 5.2 bis &amp; Annexe 4</div>
+</header>
+
+<!-- ===================== MANDAT ===================== -->
+<div class="card">
+  <h2>1 · Le mandat</h2>
+  <div class="grid">
+    <div style="grid-column:1/-1">
+      <label>Formule facturée au client</label>
+      <div class="segment" id="segFormule">
+        <button data-mode="unique" class="on">Chasse Unique — 15 %</button>
+        <button data-mode="trio">Chasse Trio — 12 %</button>
+        <button data-mode="libre">Montant libre / Mass Staffing</button>
+      </div>
+    </div>
+    <div id="blocBrut">
+      <label>Rémunération brute annuelle fixe du candidat <span class="hint">(€ — hors variable et avantages)</span></label>
+      <input type="number" id="brut" min="0" step="500" placeholder="ex. 50 000" value="50000">
+    </div>
+    <div id="blocTaux">
+      <label>Taux d'honoraires appliqué au client <span class="hint">(% du brut annuel — modifiable)</span></label>
+      <input type="number" id="taux" min="0" max="100" step="0.5" value="15">
+      <div class="hint" id="tauxHint">Grille standard : 15 % Chasse Unique · 12 % Chasse Trio</div>
+    </div>
+    <div id="blocLibre" style="display:none">
+      <label>Honoraires HT facturés au client <span class="hint">(hors frais de dossier)</span></label>
+      <input type="number" id="htLibre" min="0" step="100" placeholder="ex. 7 500">
+    </div>
+    <div>
+      <label>Frais de dossier facturés au client</label>
+      <input type="number" id="fraisDossier" min="0" step="10" value="250">
+      <div class="hint">250 € HT par mandat (grille standard)</div>
+    </div>
+  </div>
+  <div class="facture">
+    <span class="lbl">Total HT facturé au client final</span>
+    <span class="val" id="htFacture">—</span>
+  </div>
+</div>
+
+<!-- ===================== INTERVENANTS ===================== -->
+<div class="card">
+  <h2>2 · Intervenants</h2>
+  <div class="grid" style="grid-template-columns:1fr 1fr 1fr">
+    <div>
+      <label>Partenaire A</label>
+      <input type="text" id="nomA" value="MB" maxlength="30">
+    </div>
+    <div>
+      <label>Partenaire B</label>
+      <input type="text" id="nomB" value="JS" maxlength="30">
+    </div>
+    <div>
+      <label>Partenaire C</label>
+      <input type="text" id="nomC" value="FDB" maxlength="30">
+    </div>
+  </div>
+  <div class="grid" style="margin-top:14px">
+    <div>
+      <label>Apport client <span class="hint">(RDV commercial jusqu'à signature du mandat)</span></label>
+      <select id="actApport"></select>
+    </div>
+    <div>
+      <label>Sourcing <span class="hint">(candidat retenu : qualification + dossier)</span></label>
+      <select id="actSourcing"></select>
+    </div>
+    <div>
+      <label>Recrutement <span class="hint">(entretiens, présentation, closing, suivi)</span></label>
+      <select id="actRecrutement"></select>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== OPTIONS ===================== -->
+<div class="card">
+  <h2>3 · Options contractuelles</h2>
+  <div class="grid">
+    <label class="check" id="wrapHabilitee">
+      <input type="checkbox" id="habilitee">
+      <span><span class="t">Partenaire habilitée brief + offre (art. 4.4)</span><br>
+      <span class="d">Si cochée et que la partenaire apporte le client, le forfait brief + offre lui revient. Sinon, il reste à Solar People. <b>Activable uniquement si l'apport client est attribué à une partenaire.</b></span></span>
+    </label>
+    <label class="check" id="wrapBonus">
+      <input type="checkbox" id="bonus">
+      <span><span class="t">Bonus « Nouveau Client » (art. 5.2 bis)</span><br>
+      <span class="d">1er mandat d'un client sans mandat depuis 24 mois : 50 % de la marge structurelle reversée à la partenaire apporteuse. <b>Activable uniquement si l'apport client est attribué à une partenaire.</b></span></span>
+    </label>
+    <label class="check">
+      <input type="checkbox" id="garantieKO">
+      <span><span class="t">Garantie activée — remplacement échoué (art. 5.6)</span><br>
+      <span class="d">La part Recrutement est définitivement perdue pour la partenaire concernée.</span></span>
+    </label>
+  </div>
+</div>
+
+<!-- ===================== RÉSULTAT ===================== -->
+<div class="card">
+  <h2>4 · Décomposition par actes
+    <button class="btn-reset" id="btnReset" type="button">↺ Grille de la Convention</button>
+  </h2>
+  <table>
+    <thead>
+      <tr><th>Poste</th><th>Règle (modifiable)</th><th>Bénéficiaire</th><th class="num">Montant HT</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Frais administratifs</td>
+        <td><span class="regle"><input type="number" id="fAdmin" min="0" step="10" value="80" data-def="80"><span class="u">€ fixes</span></span></td>
+        <td><span class="tag sp">Solar People</span></td>
+        <td class="num" id="mAdmin">—</td>
+      </tr>
+      <tr>
+        <td>Brief client + rédaction offre</td>
+        <td><span class="regle"><input type="number" id="fBrief" min="0" step="10" value="250" data-def="250"><span class="u">€ fixes</span></span></td>
+        <td id="bBrief"></td>
+        <td class="num" id="mBrief">—</td>
+      </tr>
+      <tr>
+        <td>Apport client</td>
+        <td><span class="regle"><input type="number" id="pApport" min="0" max="100" step="0.5" value="15" data-def="15"><span class="u">% de la base</span></span></td>
+        <td id="bApport"></td>
+        <td class="num" id="mApport">—</td>
+      </tr>
+      <tr>
+        <td>Sourcing</td>
+        <td><span class="regle"><input type="number" id="pSourcing" min="0" max="100" step="0.5" value="22" data-def="22"><span class="u">% de la base</span></span></td>
+        <td id="bSourcing"></td>
+        <td class="num" id="mSourcing">—</td>
+      </tr>
+      <tr>
+        <td id="lblRec">Recrutement</td>
+        <td><span class="regle"><input type="number" id="pRec" min="0" max="100" step="0.5" value="38" data-def="38"><span class="u">% de la base</span></span></td>
+        <td id="bRec"></td>
+        <td class="num" id="mRec">—</td>
+      </tr>
+      <tr>
+        <td>Marge structurelle</td>
+        <td><span class="regle"><input type="number" id="pMarge" min="0" max="100" step="0.5" value="25" data-def="25"><span class="u">% de la base</span></span></td>
+        <td><span class="tag sp">Solar People</span></td>
+        <td class="num" id="mMarge">—</td>
+      </tr>
+      <tr id="rowBonus" style="display:none">
+        <td>Bonus Nouveau Client</td>
+        <td><span class="hint">50 % de la marge structurelle</span></td>
+        <td id="bBonus"></td>
+        <td class="num" id="mBonus">—</td>
+      </tr>
+      <tr class="total">
+        <td colspan="3" id="lblTotal">Total HT facturé</td>
+        <td class="num" id="mTotal">—</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="alerte-grille" id="alerteGrille"></div>
+  <div class="totaux" id="totaux"></div>
+  <div class="controle" id="controle"></div>
+  <div class="note">Rappel art. 5.4 : versement en une seule fois, sous double condition d'encaissement effectif client et d'expiration de la garantie de remplacement (60 jours) sans activation. Montants HT. Toute grille modifiée s'écarte de la Convention V1.2 signée — un avenant est alors nécessaire pour l'appliquer.</div>
+</div>
+
+</div>
+<footer>Solar People — Marque INPI 5090020 · Outil interne indicatif, la Convention signée fait foi.</footer>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const fmt = n => n.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
+  const num = id => parseFloat($(id).value)||0;
+
+  let mode = 'unique';
+  const TAUX = {unique:15, trio:12};
+  const GRILLE = ['fAdmin','fBrief','pApport','pSourcing','pRec','pMarge'];
+
+  /* --- formule --- */
+  document.querySelectorAll('#segFormule button').forEach(b=>{
+    b.addEventListener('click',()=>{
+      mode = b.dataset.mode;
+      document.querySelectorAll('#segFormule button').forEach(x=>x.classList.toggle('on',x===b));
+      $('blocBrut').style.display = mode==='libre' ? 'none' : '';
+      $('blocTaux').style.display = mode==='libre' ? 'none' : '';
+      $('blocLibre').style.display = mode==='libre' ? '' : 'none';
+      if(mode!=='libre') $('taux').value = TAUX[mode];
+      calc();
+    });
+  });
+
+  /* --- selects intervenants --- */
+  const selects = ['actApport','actSourcing','actRecrutement'].map($);
+  function beneficiaires(){
+    const list = [{v:'sp', t:'Solar People'}];
+    const a = $('nomA').value.trim(); if(a) list.push({v:'A', t:a});
+    const b = $('nomB').value.trim(); if(b) list.push({v:'B', t:b});
+    const c = $('nomC').value.trim(); if(c) list.push({v:'C', t:c});
+    return list;
+  }
+  function refreshSelects(){
+    const opts = beneficiaires();
+    selects.forEach(s=>{
+      const prev = s.value;
+      s.innerHTML = opts.map(o=>`<option value="${o.v}">${o.t}</option>`).join('');
+      s.value = opts.some(o=>o.v===prev) ? prev : opts[0].v;
+    });
+  }
+  function nomDe(v){
+    if(v==='sp') return 'Solar People';
+    if(v==='A') return $('nomA').value.trim()||'Partenaire A';
+    if(v==='B') return $('nomB').value.trim()||'Partenaire B';
+    return $('nomC').value.trim()||'Partenaire C';
+  }
+  function tag(v){
+    return v==='sp' ? '<span class="tag sp">Solar People</span>' : `<span class="tag">${nomDe(v)}</span>`;
+  }
+
+  /* --- grille modifiable --- */
+  function marquerModifs(){
+    GRILLE.forEach(id=>{
+      const el = $(id);
+      el.classList.toggle('modif', parseFloat(el.value) !== parseFloat(el.dataset.def));
+    });
+  }
+  $('btnReset').addEventListener('click',()=>{
+    GRILLE.forEach(id=>{ $(id).value = $(id).dataset.def; });
+    calc();
+  });
+
+  /* --- calcul --- */
+  function calc(){
+    marquerModifs();
+
+    const frais = num('fraisDossier');
+    let honoraires;
+    if(mode==='libre'){
+      honoraires = num('htLibre');
+    }else{
+      honoraires = num('brut') * num('taux')/100;
+      const std = TAUX[mode];
+      const horsGrille = Math.abs(num('taux')-std) > 0.001;
+      $('taux').classList.toggle('modif', horsGrille);
+      $('tauxHint').textContent = horsGrille
+        ? `Taux hors grille standard (${std} % pour cette formule)`
+        : 'Grille standard : 15 % Chasse Unique · 12 % Chasse Trio';
+    }
+    const ht = honoraires + frais;
+    $('htFacture').textContent = ht>0 ? fmt(ht) : '—';
+
+    const apporteur = $('actApport').value;
+    const sourceur  = $('actSourcing').value;
+    const recruteur = $('actRecrutement').value;
+
+    // options conditionnelles
+    const apportParPartenaire = apporteur !== 'sp';
+    $('wrapBonus').classList.toggle('disabled', !apportParPartenaire);
+    $('wrapHabilitee').classList.toggle('disabled', !apportParPartenaire);
+    if(!apportParPartenaire){ $('bonus').checked=false; $('habilitee').checked=false; }
+
+    // grille courante
+    const fAdmin = num('fAdmin'), fBrief = num('fBrief');
+    const pA = num('pApport'), pS = num('pSourcing'), pR = num('pRec'), pM = num('pMarge');
+    const sommePct = pA + pS + pR + pM;
+
+    // alerte grille
+    const al = $('alerteGrille');
+    if(Math.abs(sommePct - 100) > 0.001){
+      al.textContent = `La ventilation totalise ${sommePct.toLocaleString('fr-FR')} % au lieu de 100 % — le total ne correspondra pas au HT facturé.`;
+      al.classList.add('on');
+    }else{
+      al.classList.remove('on');
+    }
+
+    const base = Math.max(0, ht - fAdmin - fBrief);
+
+    const benefBrief = (apportParPartenaire && $('habilitee').checked) ? apporteur : 'sp';
+
+    const marge = base * pM/100;
+    const bonusActif = apportParPartenaire && $('bonus').checked;
+    const margeSP = bonusActif ? marge/2 : marge;
+    const margePart = bonusActif ? marge/2 : 0;
+
+    const recKO = $('garantieKO').checked;
+    const benefRec = recKO ? 'sp' : recruteur;
+
+    const lignes = [
+      {benef:'sp',       mnt:fAdmin,        cM:'mAdmin'},
+      {benef:benefBrief, mnt:fBrief,        cM:'mBrief',    cB:'bBrief'},
+      {benef:apporteur,  mnt:base*pA/100,   cM:'mApport',   cB:'bApport'},
+      {benef:sourceur,   mnt:base*pS/100,   cM:'mSourcing', cB:'bSourcing'},
+      {benef:benefRec,   mnt:base*pR/100,   cM:'mRec',      cB:'bRec'},
+      {benef:'sp',       mnt:margeSP,       cM:'mMarge'},
+    ];
+    if(bonusActif) lignes.push({benef:apporteur, mnt:margePart, cM:'mBonus', cB:'bBonus'});
+
+    // mise à jour cellules
+    lignes.forEach(l=>{
+      $(l.cM).textContent = fmt(l.mnt);
+      if(l.cB) $(l.cB).innerHTML = tag(l.benef);
+    });
+    $('rowBonus').style.display = bonusActif ? '' : 'none';
+    $('lblRec').textContent = 'Recrutement' + (recKO ? ' — perdu (garantie)' : '');
+
+    const somme = lignes.reduce((s,l)=>s+l.mnt,0);
+    $('lblTotal').textContent = `Base ventilée : ${fmt(base)} — Total`;
+    $('mTotal').textContent = fmt(somme);
+
+    // totaux par bénéficiaire
+    const tot = {};
+    lignes.forEach(l=>{ tot[l.benef]=(tot[l.benef]||0)+l.mnt; });
+    const ordre = ['A','B','C','sp'].filter(k=>tot[k]!==undefined);
+    $('totaux').innerHTML = ordre.map(k=>{
+      const pct = ht>0 ? (tot[k]/ht*100).toLocaleString('fr-FR',{maximumFractionDigits:1}) : '0';
+      return `<div class="tot ${k==='sp'?'sp':''}">
+        <div class="who">${nomDe(k)}</div>
+        <div class="amt">${fmt(tot[k])}</div>
+        <div class="det">${pct} % du HT facturé</div>
+      </div>`;
+    }).join('');
+
+    // contrôle
+    const ok = Math.abs(somme-ht) < 0.01;
+    const c = $('controle');
+    c.className = 'controle ' + (ok?'ok':'ko');
+    if(ok){
+      c.textContent = 'Contrôle : la somme des postes correspond exactement au HT facturé.';
+    }else if(Math.abs(sommePct-100) > 0.001){
+      c.textContent = `Contrôle : écart de ${fmt(somme-ht)} dû à une ventilation ≠ 100 %.`;
+    }else{
+      c.textContent = `Contrôle : écart de ${fmt(somme-ht)} — vérifiez que le HT facturé couvre au moins les forfaits fixes (${fmt(fAdmin+fBrief)}).`;
+    }
+  }
+
+  /* --- listeners --- */
+  ['brut','htLibre','fraisDossier','taux'].forEach(id=>$(id).addEventListener('input',calc));
+  GRILLE.forEach(id=>$(id).addEventListener('input',calc));
+  ['nomA','nomB','nomC'].forEach(id=>$(id).addEventListener('input',()=>{refreshSelects();calc();}));
+  selects.forEach(s=>s.addEventListener('change',calc));
+  ['habilitee','bonus','garantieKO'].forEach(id=>$(id).addEventListener('change',calc));
+
+  refreshSelects();
+  $('actApport').value='sp'; $('actSourcing').value='A'; $('actRecrutement').value='A';
+  calc();
+})();
+</script>
+</body>
+</html>
